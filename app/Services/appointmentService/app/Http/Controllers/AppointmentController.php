@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Doctor; // Asegúrate de importar el modelo Doctor
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
@@ -42,10 +43,13 @@ class AppointmentController extends Controller
 
     // Muestra el formulario para editar una cita existente
     public function edit(Appointment $appointment)
-    {
-        $doctors = Doctor::all(); // Obtiene todos los doctores para el formulario
-        return view('form', compact('appointment', 'doctors'));
+{
+    $doctors = Doctor::all(); // Obtiene todos los doctores para el formulario
+    if ($appointment->appointment_time && !$appointment->appointment_time instanceof Carbon) {
+        $appointment->appointment_time = Carbon::parse($appointment->appointment_time);
     }
+    return view('form', compact('appointment', 'doctors'));
+}
 
     // Actualiza una cita existente en la base de datos
     public function update(Request $request, Appointment $appointment)
