@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Doctor; // Asegúrate de importar el modelo Doctor
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class AppointmentController extends Controller
 {
@@ -44,6 +46,12 @@ class AppointmentController extends Controller
     public function edit(Appointment $appointment)
     {
         $doctors = Doctor::all(); // Obtiene todos los doctores para el formulario
+
+        // Verificar si appointment_time no es una instancia de Carbon y establecerla a now() si está vacía
+        if (!$appointment->appointment_time instanceof Carbon) {
+            $appointment->appointment_time = Carbon::now();
+        }
+
         return view('form', compact('appointment', 'doctors'));
     }
 

@@ -34,8 +34,10 @@
 
         <div class="form-group">
             <label for="appointment_time">Appointment Time</label>
-            <input type="datetime-local" class="form-control" id="appointment_time" name="appointment_time" value="{{ old('appointment_time', isset($appointment) ? $appointment->appointment_time->format('Y-m-d\TH:i') : '') }}" required>
+            <input type="datetime-local" class="form-control" id="appointment_time" name="appointment_time"
+                   value="{{ old('appointment_time', isset($appointment) && $appointment->appointment_time instanceof \Carbon\Carbon ? $appointment->appointment_time->format('Y-m-d\TH:i') : '') }}" required>
         </div>
+        
 
         <div class="form-group">
             <label for="duration">Duration (minutes)</label>
