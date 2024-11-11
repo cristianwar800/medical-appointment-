@@ -87,13 +87,25 @@ Para obtener una copia de este proyecto y ejecutarlo en tu máquina local, sigue
 
 A continuación, algunas capturas de pantalla de la aplicación en acción:
 
-### 🏠 Página Principal
-![Página Principal](link-a-tu-captura)
+### Página Principal Welcome
+![image](https://github.com/user-attachments/assets/422f41e8-2703-41e5-a3a9-3be2ae4e667d)
 
-### 🗓️ Panel de Citas
-![Panel de Citas](link-a-tu-captura)
+### Login
 
-## 🤝 Contribuir
+![image](https://github.com/user-attachments/assets/b7800bde-34c7-4832-878f-5207832f5e98)
+
+### Register
+![image](https://github.com/user-attachments/assets/1b65292c-ca4e-4352-b6d4-0da3be3b8850)
+
+### Home
+![image](https://github.com/user-attachments/assets/583b182d-ba9c-495a-b2ce-a6cf15cf8e12)
+![image](https://github.com/user-attachments/assets/6822d6fd-ea28-41e0-8bf4-40f50db1a178)
+![image](https://github.com/user-attachments/assets/f1cb30c8-68fc-4b74-b5d5-22c31842e858)
+![image](https://github.com/user-attachments/assets/59a50692-9dc0-4ad8-b24a-fcaeefd5d3d5)
+
+### Crud de citas
+![Imagen de WhatsApp 2024-11-10 a las 23 52 55_de5d6d1d](https://github.com/user-attachments/assets/bd6a2d26-b08e-4e12-90d8-affb7bf1adee)
+
 
 ¡Damos la bienvenida a las contribuciones! Por favor, sigue estos pasos para contribuir:
 
