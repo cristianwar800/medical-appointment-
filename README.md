@@ -109,6 +109,6 @@ Este proyecto está bajo la Licencia MIT - consulta el archivo [LICENSE](LICENSE
 
 ---
 
-🚀 Hecho con ❤️ por [Tu Nombre](https://github.com/tu-usuario)
+🚀 Hecho con ❤️ por Romina Jacqueline Aguirre Velazco, Cristian Lopez Rosales, Diego Rafael Maldonado Mendoza
 
 
