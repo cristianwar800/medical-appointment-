@@ -11,6 +11,14 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     {{ __("You're logged in!") }}
                 </div>
+                
+                <!-- Botón para acceder a /appointments -->
+                <div class="mt-4">
+                    <a href="http://localhost:8084/appointments" 
+                       class="inline-block px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                        Ver Citas
+                    </a>
+                </div>
             </div>
         </div>
     </div>
