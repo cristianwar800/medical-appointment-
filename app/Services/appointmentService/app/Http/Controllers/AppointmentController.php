@@ -3,83 +3,149 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
-use App\Models\Doctor; // Asegúrate de importar el modelo Doctor
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    // Muestra la lista de citas
+    /**
+     * Display a listing of appointments.
+     */
     public function index()
     {
-        $appointments = Appointment::all();
+        $appointments = Appointment::with('doctor')
+            ->orderBy('appointment_time', 'desc')
+            ->get()
+            ->map(function ($appointment) {
+                $appointment->formatted_time = Carbon::parse($appointment->appointment_time)
+                    ->format('d/m/Y H:i');
+                return $appointment;
+            });
+
         return view('index', compact('appointments'));
     }
 
-    // Muestra el formulario para crear una nueva cita
+    /**
+     * Show the form for creating a new appointment.
+     */
     public function create()
     {
-        $doctors = Doctor::all(); // Obtiene todos los doctores para el formulario
-        return view('form', compact('doctors'));
+        $doctors = Doctor::orderBy('name')->get();
+        $appointment = new Appointment();
+        $appointment->status = 'scheduled'; // Estado por defecto
+
+        return view('form', compact('doctors', 'appointment'));
     }
 
-    // Almacena una nueva cita en la base de datos
+    /**
+     * Store a newly created appointment.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'patient_name' => 'required|string',
-            'patient_contact' => 'required|string',
+        $validated = $request->validate([
+            'patient_name' => 'required|string|max:255',
+            'patient_contact' => 'required|string|max:50',
             'doctor_id' => 'required|exists:doctors,id',
             'appointment_time' => 'required|date',
-            'duration' => 'nullable|integer',
-            'status' => 'required|string',
-            'appointment_notes' => 'nullable|string',
+            'duration' => 'nullable|integer|min:1|max:480',
+            'status' => 'required|in:scheduled,completed,cancelled',
+            'appointment_notes' => 'nullable|string|max:1000',
         ]);
 
-        Appointment::create($request->all());
+        $validated['appointment_time'] = Carbon::parse($request->appointment_time);
+        
+        Appointment::create($validated);
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment created successfully.');
+        return redirect()
+            ->route('appointments.index')
+            ->with('success', 'La cita ha sido creada exitosamente.');
     }
 
-    // Muestra el formulario para editar una cita existente
-    public function edit(Appointment $appointment)
-{
-    $doctors = Doctor::all(); // Obtiene todos los doctores para el formulario
-    if ($appointment->appointment_time && !$appointment->appointment_time instanceof Carbon) {
-        $appointment->appointment_time = Carbon::parse($appointment->appointment_time);
-    }
-    return view('form', compact('appointment', 'doctors'));
-}
-
-    // Actualiza una cita existente en la base de datos
-    public function update(Request $request, Appointment $appointment)
-    {
-        $request->validate([
-            'patient_name' => 'required|string',
-            'patient_contact' => 'required|string',
-            'doctor_id' => 'required|exists:doctors,id',
-            'appointment_time' => 'required|date',
-            'duration' => 'nullable|integer',
-            'status' => 'required|string',
-            'appointment_notes' => 'nullable|string',
-        ]);
-
-        $appointment->update($request->all());
-
-        return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
-    }
-
-    // Muestra una cita específica
+    /**
+     * Display the specified appointment.
+     */
     public function show(Appointment $appointment)
     {
+        $appointment->load('doctor');
+        
+        // Asegurar que appointment_time sea una instancia de Carbon
+        if ($appointment->appointment_time && !$appointment->appointment_time instanceof Carbon) {
+            $appointment->appointment_time = Carbon::parse($appointment->appointment_time);
+        }
+
+        // Preparar textos de estado para la vista
+        $statusTexts = [
+            'scheduled' => 'Programada',
+            'completed' => 'Completada',
+            'cancelled' => 'Cancelada'
+        ];
+
+        $appointment->status_text = $statusTexts[$appointment->status] ?? 'Desconocido';
+
         return view('show', compact('appointment'));
     }
 
-    // Elimina una cita de la base de datos
+    /**
+     * Show the form for editing the specified appointment.
+     */
+    public function edit(Appointment $appointment)
+    {
+        $doctors = Doctor::orderBy('name')->get();
+        
+        if ($appointment->appointment_time && !$appointment->appointment_time instanceof Carbon) {
+            $appointment->appointment_time = Carbon::parse($appointment->appointment_time);
+        }
+    
+        return view('form', compact('appointment', 'doctors'));
+    }
+    
+    /**
+     * Update the specified appointment.
+     */
+    public function update(Request $request, Appointment $appointment)
+    {
+        $validated = $request->validate([
+            'patient_name' => 'required|string|max:255',
+            'patient_contact' => 'required|string|max:50',
+            'doctor_id' => 'required|exists:doctors,id',
+            'appointment_time' => 'required|date',
+            'duration' => 'nullable|integer|min:1|max:480',
+            'status' => 'required|in:scheduled,completed,cancelled',
+            'appointment_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $validated['appointment_time'] = Carbon::parse($request->appointment_time);
+        
+        $appointment->update($validated);
+
+        return redirect()
+            ->route('appointments.index')
+            ->with('success', 'La cita ha sido actualizada exitosamente.');
+    }
+
+    /**
+     * Cancel the specified appointment.
+     */
+    public function cancel(Appointment $appointment)
+    {
+        $appointment->update(['status' => 'cancelled']);
+
+        return redirect()
+            ->route('appointments.index')
+            ->with('success', 'La cita ha sido cancelada exitosamente.');
+    }
+
+    /**
+     * Remove the specified appointment.
+     */
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment deleted successfully.');
+        return redirect()
+            ->route('appointments.index')
+            ->with('success', 'La cita ha sido eliminada exitosamente.');
     }
 }
