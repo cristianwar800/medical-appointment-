@@ -109,6 +109,10 @@ A continuación, algunas capturas de pantalla de la aplicación en acción:
 ### Kubernetes
 ![kubernetes](https://github.com/user-attachments/assets/f9735958-edcd-41c1-a7e1-453117990fcf)
 
+### ChatBot
+![chatbot](https://github.com/user-attachments/assets/c496778b-2143-4127-9c81-5928300391e1)
+![chatbot2](https://github.com/user-attachments/assets/5e9848f6-ac15-4687-a029-c032d91a89fc)
+
 
 
 ¡Damos la bienvenida a las contribuciones! Por favor, sigue estos pasos para contribuir:
