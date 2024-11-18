@@ -106,6 +106,10 @@ A continuación, algunas capturas de pantalla de la aplicación en acción:
 ### Crud de citas
 ![Imagen de WhatsApp 2024-11-10 a las 23 52 55_de5d6d1d](https://github.com/user-attachments/assets/bd6a2d26-b08e-4e12-90d8-affb7bf1adee)
 
+### Kubernetes
+![kubernetes](https://github.com/user-attachments/assets/f9735958-edcd-41c1-a7e1-453117990fcf)
+
+
 
 ¡Damos la bienvenida a las contribuciones! Por favor, sigue estos pasos para contribuir:
 
