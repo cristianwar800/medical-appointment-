@@ -31,3 +31,5 @@ Route::middleware('auth')->group(function () {
 });
 require base_path('app/Services/AppointmentService/routes/web.php');
 require __DIR__.'/auth.php';
+require base_path('app/Services/chatbot-service/routes/web.php');
+
