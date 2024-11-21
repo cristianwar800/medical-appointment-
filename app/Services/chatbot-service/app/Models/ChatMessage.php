@@ -1,11 +1,10 @@
-// En el microservicio: app/Models/ChatMessage.php
 <?php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ChatMessage extends Model
+class ChatMessage extends Model 
 {
     protected $fillable = [
         'session_id',
@@ -28,7 +27,7 @@ class ChatMessage extends Model
         return $query->where('type', 'bot');
     }
 
-    // Scope ppara mensajes del usuario
+    // Scope para mensajes del usuario
     public function scopeUser($query)
     {
         return $query->where('type', 'user');

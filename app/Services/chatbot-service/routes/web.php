@@ -20,6 +20,10 @@ Route::get('/', function () {
 // routes/web.php
 // routes/web.php
 Route::middleware(['auth'])->group(function () {
-    Route::get('/chat', [ChatbotController::class, 'index'])->name('chat.index');
-    Route::post('/chat/send', [ChatbotController::class, 'sendMessage'])->name('chat.send');
+   
 });
+
+Route::get('/chat', [ChatbotController::class, 'index'])->name('chat.index');
+Route::post('/chat/send', [ChatbotController::class, 'sendMessage'])->name('chat.send');
+Route::post('/chat/validate', [ChatbotController::class, 'validateUser'])->name('chat.validate');
+Route::get('/chat/check-session', [ChatbotController::class, 'checkSession'])->name('chat.check-session');

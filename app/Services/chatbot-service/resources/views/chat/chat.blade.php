@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -57,6 +58,7 @@
             animation: fadeIn 0.3s ease-out;
             margin-bottom: 1rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: pre-line;
         }
 
         .message-bubble.user {
@@ -100,10 +102,6 @@
             50% { transform: translateY(-10px); }
         }
 
-        .chat-header {
-            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-        }
-
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
@@ -115,23 +113,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #1a73e8;
             border-radius: 3px;
-        }
-
-        .dark-mode .chat-container {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-        }
-
-        .dark-mode .message-bubble.bot {
-            background: #333333;
-            border-color: #444444;
-            color: white;
-        }
-
-        .dark-mode input, 
-        .dark-mode select {
-            background-color: #444444;
-            color: white;
-            border-color: #555555;
         }
     </style>
 </head>
@@ -145,7 +126,8 @@
     </div>
 
     <div class="chat-container mx-auto max-w-4xl p-4">
-        <div class="chat-header rounded-t-2xl shadow-lg p-6 flex items-center gap-4 text-white">
+        <!-- Chat Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-t-xl shadow-lg p-6 flex items-center gap-4 text-white">
             <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                 <i class="fas fa-robot text-white text-2xl"></i>
             </div>
@@ -155,23 +137,30 @@
             </div>
         </div>
 
-        <div class="bg-white shadow-lg rounded-b-2xl flex flex-col h-[calc(100vh-16rem)]">
+        <!-- Chat Messages Container -->
+        <div class="bg-white shadow-lg rounded-b-xl flex flex-col h-[calc(100vh-16rem)]">
             <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4 custom-scrollbar"></div>
 
+            <!-- Typing Indicator -->
             <div id="typing-indicator" class="typing-indicator hidden mx-6">
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
             </div>
 
-            <div class="border-t p-4 bg-gray-50 rounded-b-2xl">
+            <!-- Chat Input -->
+            <div class="border-t p-4 bg-gray-50 rounded-b-xl">
                 <form id="chat-form" class="flex gap-4">
                     <select id="user-type" class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white">
                         <option value="doctor">Doctor</option>
                         <option value="receptionist">Recepcionista</option>
                     </select>
-                    <input type="text" id="message-input" class="flex-1 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" placeholder="Escribe tu mensaje...">
-                    <button type="submit" class="button-primary bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-2">
+                    <input type="text" 
+                           id="message-input" 
+                           class="flex-1 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                           placeholder="Escribe tu mensaje...">
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-2">
                         <span>Enviar</span>
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -184,16 +173,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('chat-form');
             const messagesContainer = document.getElementById('chat-messages');
-            const userTypeSelect = document.getElementById('user-type');
             const messageInput = document.getElementById('message-input');
+            const userTypeSelect = document.getElementById('user-type');
             const typingIndicator = document.getElementById('typing-indicator');
-            
-            // Función para mostrar errores en la consola y en el chat
-            function handleError(error) {
-                console.error('Error:', error);
-                addMessage('Lo siento, ha ocurrido un error. Por favor, intenta de nuevo.', 'bot');
-            }
 
+            // Función mejorada para mostrar mensajes
             function addMessage(message, type) {
                 const div = document.createElement('div');
                 div.className = `message-bubble ${type}`;
@@ -202,21 +186,15 @@
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
 
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const message = messageInput.value.trim();
-                if (!message) return;
+            // Función para manejar errores
+            function handleError(error) {
+                console.error('Error detallado:', error);
+                typingIndicator.classList.add('hidden');
+                addMessage('Error de comunicación: ' + error.message, 'bot');
+            }
 
-                // Mostrar el mensaje del usuario
-                addMessage(message, 'user');
-                messageInput.value = '';
-                
-                // Mostrar indicador de escritura
-                if (typingIndicator) {
-                    typingIndicator.classList.remove('hidden');
-                }
-
+            // Función principal para enviar mensajes
+            async function sendChatMessage(message, userType) {
                 try {
                     const response = await fetch('/chat/send', {
                         method: 'POST',
@@ -227,43 +205,71 @@
                         },
                         body: JSON.stringify({
                             message: message,
-                            user_type: userTypeSelect.value
+                            user_type: userType
                         })
                     });
 
+                    // Log para debugging
+                    console.log('Respuesta del servidor:', response);
+
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(`Error HTTP: ${response.status}`);
                     }
 
                     const data = await response.json();
+                    console.log('Datos recibidos:', data);
+
+                    return data;
+                } catch (error) {
+                    console.error('Error en sendChatMessage:', error);
+                    throw error;
+                }
+            }
+
+            // Manejador del formulario
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const message = messageInput.value.trim();
+                if (!message) return;
+
+                // Mostrar mensaje del usuario
+                addMessage(message, 'user');
+                messageInput.value = '';
+                
+                // Mostrar indicador de escritura
+                typingIndicator.classList.remove('hidden');
+
+                try {
+                    console.log('Enviando mensaje:', message);
+                    const data = await sendChatMessage(message, userTypeSelect.value);
                     
-                    // Ocultar indicador de escritura
-                    if (typingIndicator) {
-                        typingIndicator.classList.add('hidden');
-                    }
+                    typingIndicator.classList.add('hidden');
 
                     if (data.status === 'success') {
                         addMessage(data.message, 'bot');
                     } else {
-                        handleError(new Error(data.message));
+                        throw new Error(data.message || 'Error desconocido');
                     }
 
                 } catch (error) {
-                    if (typingIndicator) {
-                        typingIndicator.classList.add('hidden');
-                    }
                     handleError(error);
                 }
             });
 
-            // Permitir enviar con Enter
+            // Manejo de Enter para enviar mensaje
             messageInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     form.dispatchEvent(new Event('submit'));
                 }
             });
+
+            // Debug inicial
+            console.log('Chat inicializado');
+            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').content);
         });
     </script>
 </body>
 </html>
+```

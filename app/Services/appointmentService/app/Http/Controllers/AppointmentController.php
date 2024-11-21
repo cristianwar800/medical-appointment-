@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers;  // Sin cambios
 
+use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {

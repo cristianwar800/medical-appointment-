@@ -11,10 +11,13 @@ services:
       DB_DATABASE: medical-appointment
       DB_USERNAME: root
       DB_PASSWORD:
+      CORS_ALLOWED_ORIGINS: "http://localhost:8084,http://localhost:8086"
     volumes:
       - C:/laragon/www/medical-appointment-system:/var/www/html
     depends_on:
       - db
+    networks:
+      - app-network
 
   appointments-app:
     build:
@@ -28,10 +31,13 @@ services:
       DB_DATABASE: medical-appointment
       DB_USERNAME: root
       DB_PASSWORD:
+      CORS_ALLOWED_ORIGINS: "http://localhost:8082,http://localhost:8086"
     volumes:
       - C:/laragon/www/medical-appointment-system/app/Services/appointmentService:/var/www/html
     depends_on:
       - db
+    networks:
+      - app-network
 
   chatbot-service:
     build:
@@ -45,10 +51,13 @@ services:
       DB_DATABASE: medical-appointment
       DB_USERNAME: root
       DB_PASSWORD:
+      CORS_ALLOWED_ORIGINS: "http://localhost:8082,http://localhost:8084"
     volumes:
       - C:/laragon/www/medical-appointment-system/app/Services/chatbot-service:/var/www/html
     depends_on:
       - db
+    networks:
+      - app-network
 
   db:
     image: mariadb
@@ -60,6 +69,12 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - app-network
 
 volumes:
   db_data:
+
+networks:
+  app-network:
+    driver: bridge
