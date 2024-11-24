@@ -1,0 +1,38 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main", "pipeline" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        include:
+          - service: app
+            port: 8082
+          - service: appointments-app
+            port: 8084
+          - service: chatbot-service
+            port: 8086
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.service }}
+        run: docker build . --file Dockerfile --tag ${{ matrix.service }}:$(date +%s)
+        env:
+          DOCKER_BUILDKIT: 1
+
+      - name: Test build
+        run: |
+          docker run -d \
+            --name test-${{ matrix.service }} \
+            -p ${{ matrix.port }}:80 \
+            ${{ matrix.service }}:$(date +%s)
+          sleep 10
+          curl -f http://localhost:${{ matrix.port }} || exit 1
