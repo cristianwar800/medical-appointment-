@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-config
+data:
+  APP_ENV: testing
+  DB_CONNECTION: mysql
+  DB_HOST: localhost
+  DB_DATABASE: medical_test
+  DB_USERNAME: root
+  DB_PASSWORD: ""
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+spec:
+  containers:
+  - name: php-test
+    image: php:8.1-cli
+    env:
+    - name: APP_ENV
+      valueFrom:
+        configMapKeyRef:
+          name: test-config
+          key: APP_ENV

@@ -1,0 +1,91 @@
+name: Medical System CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Code Quality Check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: phpcs, phpmd
+          
+      - name: Check Code Style
+        run: |
+          composer require squizlabs/php_codesniffer
+          ./vendor/bin/phpcs app/
+
+  test:
+    name: Run Tests
+    runs-on: windows-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup PHP Testing Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, xml, pdo_mysql
+          
+      - name: Install Dependencies
+        run: composer install --no-interaction
+        
+      - name: Execute Tests
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan config:clear
+          ./vendor/bin/phpunit
+
+  build:
+    name: Build Docker Images
+    runs-on: windows-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    strategy:
+      matrix:
+        service: [medical-app, appointments-app, chatbot-service]
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Build Image
+        run: |
+          echo "Building ${{ matrix.service }} image..."
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:testing -f kubernetes/dockerfiles/${{ matrix.service }}.Dockerfile .
+          
+      - name: Test Image
+        run: |
+          echo "Testing ${{ matrix.service }} image..."
+          docker run -d --name test-${{ matrix.service }} ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:testing
+          docker ps | grep test-${{ matrix.service }}
+          docker stop test-${{ matrix.service }}
+          docker rm test-${{ matrix.service }}
+
+  notify:
+    name: Notify Results
+    runs-on: windows-latest
+    needs: [lint, test, build]
+    if: always()
+    steps:
+      - name: Check Build Status
+        run: |
+          echo "Pipeline Status:"
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Test: ${{ needs.test.result }}"
+          echo "Build: ${{ needs.build.result }}"
