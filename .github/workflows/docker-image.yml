@@ -6,49 +6,65 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        include:
-          - service: app
-            port: 8082
-          - service: appointments-app
-            port: 8084
-          - service: chatbot-service
-            port: 8086
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Primero hacemos login en Docker Hub
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # Configuramos Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build y test en un solo paso
-      - name: Build and test ${{ matrix.service }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push app
         uses: docker/build-push-action@v5
         with:
           context: .
-          load: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          push: true
+          tags: ghcr.io/${{ github.repository }}/app:latest
+          
+      - name: Build and push appointments
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/appointments:latest
 
-      # Test separado
-      - name: Test container
+      - name: Build and push chatbot
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/chatbot:latest
+
+      - name: Test containers
         run: |
-          docker images
-          docker run -d \
-            --name ${{ matrix.service }} \
-            -p ${{ matrix.port }}:80 \
-            ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
+          docker pull ghcr.io/${{ github.repository }}/app:latest
+          docker pull ghcr.io/${{ github.repository }}/appointments:latest
+          docker pull ghcr.io/${{ github.repository }}/chatbot:latest
+          
+          docker run -d --name app -p 8082:80 ghcr.io/${{ github.repository }}/app:latest
+          docker run -d --name appointments -p 8084:80 ghcr.io/${{ github.repository }}/appointments:latest
+          docker run -d --name chatbot -p 8086:80 ghcr.io/${{ github.repository }}/chatbot:latest
+
+          # Esperar a que los contenedores estén listos
+          sleep 30
+
+          # Test de salud básico
+          curl -f http://localhost:8082 || exit 1
+          curl -f http://localhost:8084 || exit 1
+          curl -f http://localhost:8086 || exit 1
