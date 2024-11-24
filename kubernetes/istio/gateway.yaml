@@ -1,0 +1,28 @@
+# gateway.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: medical-gateway
+  namespace: default
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 30082
+      name: medical
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
+      number: 30084
+      name: appointments
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
+      number: 30086
+      name: chatbot
+      protocol: HTTP
+    hosts:
+    - "*"

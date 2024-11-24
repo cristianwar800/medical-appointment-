@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medical-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-app
+  template:
+    metadata:
+      labels:
+        app: medical-app
+    spec:
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          mkdir -p /var/www/html/storage/logs && \
+          mkdir -p /var/www/html/storage/framework/sessions && \
+          mkdir -p /var/www/html/storage/framework/views && \
+          mkdir -p /var/www/html/storage/framework/cache && \
+          mkdir -p /var/www/html/storage/app/public && \
+          mkdir -p /var/www/html/bootstrap/cache && \
+          chmod -R 777 /var/www/html/storage && \
+          chmod -R 777 /var/www/html/bootstrap/cache
+        volumeMounts:
+        - name: app-storage
+          mountPath: /var/www/html/storage
+      containers:
+      - name: medical-app
+        image: medical-app:k8s
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+        - name: app-storage
+          mountPath: /var/www/html/storage
+        - name: bootstrap-cache
+          mountPath: /var/www/html/bootstrap/cache
+      volumes:
+      - name: app-storage
+        persistentVolumeClaim:
+          claimName: app-storage-pvc
+      - name: bootstrap-cache
+        emptyDir: {}

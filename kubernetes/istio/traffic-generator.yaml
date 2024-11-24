@@ -1,0 +1,40 @@
+# traffic-generator.yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: traffic-generator
+spec:
+  schedule: "*/1 * * * *"  # Cada minuto
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: traffic-generator
+            image: curlimages/curl
+            command: 
+            - /bin/sh
+            - -c
+            - |
+              # Medical App
+              curl -s http://medical-app-service/api/health || true
+              sleep 2
+              
+              # Appointments
+              curl -s http://appointments-service/api/health || true
+              sleep 2
+              
+              # Chatbot
+              curl -s http://chatbot-service/api/health || true
+              
+              # Generar más tráfico aleatorio
+              for i in {1..5}; do
+                service=$((RANDOM % 3))
+                case $service in
+                  0) curl -s http://medical-app-service/api/health ;;
+                  1) curl -s http://appointments-service/api/health ;;
+                  2) curl -s http://chatbot-service/api/health ;;
+                esac
+                sleep 1
+              done
+          restartPolicy: OnFailure

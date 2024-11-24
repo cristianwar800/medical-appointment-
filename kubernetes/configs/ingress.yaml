@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: medical-system-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /()(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: medical-app-service
+            port:
+              number: 80
+      - path: /appointments(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: appointments-service
+            port:
+              number: 80
+      - path: /chatbot(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: chatbot-service
+            port:
+              number: 80

@@ -29,7 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
         
 });
-//require base_path('app/Services/AppointmentService/routes/web.php');
+require base_path('app/Services/AppointmentService/routes/web.php');
 require __DIR__.'/auth.php';
-//require base_path('app/Services/chatbot-service/routes/web.php');
+require base_path('app/Services/chatbot-service/routes/web.php');
 

@@ -1,0 +1,82 @@
+# virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: medical-vs
+  namespace: default
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - medical-gateway
+  http:
+  # Rutas externas (ports)
+  - match:
+    - port: 30082
+    route:
+    - destination:
+        host: medical-app-service
+        port:
+          number: 80
+        subset: v1
+  - match:
+    - port: 30084
+    route:
+    - destination:
+        host: appointments-service
+        port:
+          number: 80
+        subset: v1
+  - match:
+    - port: 30086
+    route:
+    - destination:
+        host: chatbot-service
+        port:
+          number: 80
+        subset: v1
+  
+  # Comunicación interna entre servicios
+  - match:
+    - uri:
+        prefix: /medical
+    route:
+    - destination:
+        host: medical-app-service
+        subset: v1
+  - match:
+    - uri:
+        prefix: /appointments
+    route:
+    - destination:
+        host: appointments-service
+        subset: v1
+  - match:
+    - uri:
+        prefix: /chat
+    route:
+    - destination:
+        host: chatbot-service
+        subset: v1
+  # Comunicación entre servicios mediante API
+  - match:
+    - uri:
+        prefix: /api/medical
+    route:
+    - destination:
+        host: medical-app-service
+        subset: v1
+  - match:
+    - uri:
+        prefix: /api/appointments
+    route:
+    - destination:
+        host: appointments-service
+        subset: v1
+  - match:
+    - uri:
+        prefix: /api/chat
+    route:
+    - destination:
+        host: chatbot-service
+        subset: v1

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medical-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-app
+  template:
+    metadata:
+      labels:
+        app: medical-app
+    spec:
+      containers:
+      - name: medical-app
+        image: medical-app:k8s
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+        - name: app-storage
+          mountPath: /var/www/html/storage
+        - name: appointments-service
+          mountPath: /var/www/html/app/Services/appointmentService
+        - name: chatbot-service
+          mountPath: /var/www/html/app/Services/chatbot-service
+      volumes:
+      - name: app-storage
+        persistentVolumeClaim:
+          claimName: app-storage-pvc
+      - name: appointments-service
+        hostPath:
+          path: /app/Services/appointmentService
+          type: Directory
+      - name: chatbot-service
+        hostPath:
+          path: /app/Services/chatbot-service
+          type: Directory
