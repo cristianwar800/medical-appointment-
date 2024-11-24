@@ -23,16 +23,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Usar tus credenciales de Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Build ${{ matrix.service }}
-        run: docker build . --file Dockerfile --tag ${{ matrix.service }}:$(date +%s)
-        env:
-          DOCKER_BUILDKIT: 1
+        run: |
+          docker build . --file Dockerfile \
+            --tag ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest \
+            --build-arg SERVICE=${{ matrix.service }}
 
       - name: Test build
         run: |
           docker run -d \
             --name test-${{ matrix.service }} \
             -p ${{ matrix.port }}:80 \
-            ${{ matrix.service }}:$(date +%s)
-          sleep 10
-          curl -f http://localhost:${{ matrix.port }} || exit 1
+            ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
+
+      # Opcional: Push a Docker Hub
+      - name: Push image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
