@@ -28,43 +28,33 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push app
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}/app:latest
-          
-      - name: Build and push appointments
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/appointments:latest
+      - name: Build images
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/app:latest .
+          docker build -t ghcr.io/${{ github.repository }}/appointments:latest .
+          docker build -t ghcr.io/${{ github.repository }}/chatbot:latest .
 
-      - name: Build and push chatbot
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/chatbot:latest
+      - name: Push images
+        run: |
+          docker push ghcr.io/${{ github.repository }}/app:latest
+          docker push ghcr.io/${{ github.repository }}/appointments:latest
+          docker push ghcr.io/${{ github.repository }}/chatbot:latest
+
+      - name: Clean existing containers
+        run: |
+          docker ps -aq | xargs -r docker rm -f
+          docker system prune -af
 
       - name: Test containers
         run: |
-          docker pull ghcr.io/${{ github.repository }}/app:latest
-          docker pull ghcr.io/${{ github.repository }}/appointments:latest
-          docker pull ghcr.io/${{ github.repository }}/chatbot:latest
-          
           docker run -d --name app -p 8082:80 ghcr.io/${{ github.repository }}/app:latest
-          docker run -d --name appointments -p 8084:80 ghcr.io/${{ github.repository }}/appointments:latest
-          docker run -d --name chatbot -p 8086:80 ghcr.io/${{ github.repository }}/chatbot:latest
-
-          # Esperar a que los contenedores estén listos
-          sleep 30
-
-          # Test de salud básico
+          sleep 10
           curl -f http://localhost:8082 || exit 1
+          
+          docker run -d --name appointments -p 8084:80 ghcr.io/${{ github.repository }}/appointments:latest
+          sleep 10
           curl -f http://localhost:8084 || exit 1
+          
+          docker run -d --name chatbot -p 8086:80 ghcr.io/${{ github.repository }}/chatbot:latest
+          sleep 10
           curl -f http://localhost:8086 || exit 1
