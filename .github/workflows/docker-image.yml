@@ -28,50 +28,42 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Construir y publicar la imagen principal
-      - name: Build and push main app
+      # Construir y publicar imágenes
+      - name: Build and push all images
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/medical-app:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/medical-app:latest
+            ghcr.io/${{ github.repository_owner }}/medical-appointments:latest
+            ghcr.io/${{ github.repository_owner }}/medical-chatbot:latest
 
-      # Construir y publicar el servicio de citas
-      - name: Build and push appointments
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/medical-appointments:latest
-
-      # Construir y publicar el servicio de chatbot
-      - name: Build and push chatbot
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/medical-chatbot:latest
-
-      # Limpiar contenedores existentes
-      - name: Clean existing containers
+      # Limpiar todo antes de probar
+      - name: Clean environment
         run: |
           docker ps -aq | xargs -r docker rm -f
           docker system prune -af
+          sudo killall -9 node || true
+          sudo killall -9 apache2 || true
+          sudo lsof -t -i:9901 | xargs -r sudo kill -9
+          sudo lsof -t -i:9902 | xargs -r sudo kill -9
+          sudo lsof -t -i:9903 | xargs -r sudo kill -9
 
-      # Probar los contenedores
+      # Probar los contenedores con puertos diferentes
       - name: Test containers
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/medical-app:latest
-          docker run -d --name app -p 8082:80 ghcr.io/${{ github.repository_owner }}/medical-app:latest
+          # Probar app principal
+          docker run -d --name app -p 9901:80 ghcr.io/${{ github.repository_owner }}/medical-app:latest
+          sleep 10
+          curl -f http://localhost:9901 || exit 1
           
-          docker pull ghcr.io/${{ github.repository_owner }}/medical-appointments:latest
-          docker run -d --name appointments -p 8084:80 ghcr.io/${{ github.repository_owner }}/medical-appointments:latest
+          # Probar servicio de citas
+          docker run -d --name appointments -p 9902:80 ghcr.io/${{ github.repository_owner }}/medical-appointments:latest
+          sleep 10
+          curl -f http://localhost:9902 || exit 1
           
-          docker pull ghcr.io/${{ github.repository_owner }}/medical-chatbot:latest
-          docker run -d --name chatbot -p 8086:80 ghcr.io/${{ github.repository_owner }}/medical-chatbot:latest
-          
-          sleep 30
-          
-          curl -f http://localhost:8082 || exit 1
-          curl -f http://localhost:8084 || exit 1
-          curl -f http://localhost:8086 || exit 1
+          # Probar chatbot
+          docker run -d --name chatbot -p 9903:80 ghcr.io/${{ github.repository_owner }}/medical-chatbot:latest
+          sleep 10
+          curl -f http://localhost:9903 || exit 1
