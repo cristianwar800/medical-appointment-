@@ -113,6 +113,10 @@ A continuación, algunas capturas de pantalla de la aplicación en acción:
 ![chatbot](https://github.com/user-attachments/assets/c496778b-2143-4127-9c81-5928300391e1)
 ![chatbot2](https://github.com/user-attachments/assets/5e9848f6-ac15-4687-a029-c032d91a89fc)
 
+### Istio
+![cd417483-915b-42b0-a827-207ff785f747](https://github.com/user-attachments/assets/8b0472ec-6ca8-4c2f-bb8e-a448287b41ec)
+
+
 ### The Chaos
 ![1](https://github.com/user-attachments/assets/5e6113bd-c20c-463b-a493-062ad5c84e44)
 ![2](https://github.com/user-attachments/assets/8003ef67-88a1-4958-aa76-8c7359cee1e4)
