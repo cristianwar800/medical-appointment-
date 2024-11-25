@@ -115,6 +115,8 @@ A continuación, algunas capturas de pantalla de la aplicación en acción:
 
 ### Istio
 ![cd417483-915b-42b0-a827-207ff785f747](https://github.com/user-attachments/assets/8b0472ec-6ca8-4c2f-bb8e-a448287b41ec)
+![44 (1)](https://github.com/user-attachments/assets/55b4021d-e4db-42f3-8b97-c48b06f92bd9)
+
 
 
 ### The Chaos
