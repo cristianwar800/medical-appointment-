@@ -117,6 +117,9 @@ A continuación, algunas capturas de pantalla de la aplicación en acción:
 ![1](https://github.com/user-attachments/assets/5e6113bd-c20c-463b-a493-062ad5c84e44)
 ![2](https://github.com/user-attachments/assets/8003ef67-88a1-4958-aa76-8c7359cee1e4)
 ![3](https://github.com/user-attachments/assets/b7af5f74-92cd-426a-a5e4-61ffb78ccf1b)
+![4](https://github.com/user-attachments/assets/ab83237e-3a9b-404c-be63-ba25ba711295)
+![5](https://github.com/user-attachments/assets/08cddb6e-a293-4924-a9f2-92976bf9fec5)
+![6](https://github.com/user-attachments/assets/068df6e2-65fa-4150-966c-8ff3079fd40c)
 
 
 
